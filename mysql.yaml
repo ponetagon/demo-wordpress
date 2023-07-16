@@ -10,7 +10,7 @@ spec:
   selector:
     app: wordpress
     tier: mysql
-  type: clusterIP
+  type: ClusterIP
   clusterIP: None
 ---
 apiVersion: v1
