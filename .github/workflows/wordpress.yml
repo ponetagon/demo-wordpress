@@ -25,19 +25,16 @@ jobs:
       # Runs a single command using the runners shell
       - uses: actions-hub/kubectl@master
         name: Check_secret
-        id: get-pass
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
           args: get secret pass -o name
       
-      - name: Print image
-        run: 
-          echo ${{ steps.get-pass.outputs.result }}
+      - name: Deploy secret
+        run: kubectl get node
             
       - uses: actions-hub/kubectl@master
         name: Deploy secret on Kubernetes
-        if: steps.get-pass.outputs.result != 'secret/pass'
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
         with:
