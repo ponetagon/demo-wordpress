@@ -30,6 +30,11 @@ jobs:
         with:
           args: get secret pass -o name
       
+      - name: Set up Kubernetes
+        uses: azure/k8s-set-context@v1
+        with:
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+          
       - name: Deploy secret
         run: kubectl get node
             
