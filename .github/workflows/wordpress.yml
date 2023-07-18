@@ -35,26 +35,16 @@ jobs:
         with:
           kubeconfig: ${{ secrets.KUBECONFIG }}
           
-      - name: Deploy secret
+      - name: Check Node
         run: kubectl get node
+        
+      - name: Deploy Secret
+        run: kubectl create secret generic pass --from-literal password=${{ secrets.PASSWORD }} -oyaml --dry-run=client | kubectl apply -f -
+        
+      - name: Deploy MYSQL 
+        run: kubectl apply -f mysql.yaml
+        
+      - name: Deploy WORDPRESS
+        run: kubectl apply -f wordpress.yaml
             
-      - uses: actions-hub/kubectl@master
-        name: Deploy secret on Kubernetes
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
-        with:
-            args: create secret generic pass --from-literal password=${{ secrets.PASSWORD }} 
-      
-      - uses: actions-hub/kubectl@master
-        name: Deploy MYSQL on Kubernetes
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
-        with:
-            args: apply -f mysql.yaml
-         
-      - uses: actions-hub/kubectl@master
-        name: Deploy WORDPRESS on Kubernetes
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
-        with:
-            args: apply -f wordpress.yaml   
+
