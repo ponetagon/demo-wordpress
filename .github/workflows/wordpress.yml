@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v3
 
       # Runs a single command using the runners shell
-      - uses: actions-hub/kubectl@master
+      - uses: Consensys/kubernetes-action@master
         name: Check_secret
         id: get-pass
         env:
@@ -31,7 +31,7 @@ jobs:
         with:
           args: get secret pass -o name
             
-      - uses: actions-hub/kubectl@master
+      - uses: Consensys/kubernetes-action@master
         name: Deploy secret on Kubernetes
         if: steps.get-pass.outputs.result != 'secret/pass'
         env:
