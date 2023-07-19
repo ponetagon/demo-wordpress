@@ -49,7 +49,7 @@ jobs:
         run: kubectl create deployment myimage --image ${{ secrets.DOCKER_USER }}/cicd101:${{ vars.IMAGE_VERSION }} -oyaml --dry-run=client | kubectl apply -f -
       
       - name: Expose service
-        run: kubectl expose deploy myimage --name myimage --port 80 --type ClusterIP
+        run: kubectl expose deploy myimage --name myimage --port 80 --type ClusterIP -oyaml --dry-run=client | kubectl apply -f -
       
       - name: Deploy Secret
         run: kubectl create secret generic pass --from-literal password=${{ secrets.PASSWORD }} -oyaml --dry-run=client | kubectl apply -f -
