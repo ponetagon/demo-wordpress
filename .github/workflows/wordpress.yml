@@ -16,8 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Build Image
+        run: docker build -t cicd101
+      - name: Tag Image
+        run: docker tag cicd101 
   # This workflow contains a single job called "build"
-  deplou:
+  deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     environment: cicd-wordpress
@@ -26,14 +30,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - uses: actions-hub/kubectl@master
-        name: Check_secret
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-        with:
-          args: get secret pass -o name
-      
+      # Runs a single command using the runners shell      
       - name: Set up Kubernetes
         uses: azure/k8s-set-context@v1
         with:
