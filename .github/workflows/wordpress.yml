@@ -14,12 +14,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: myimage
     steps:
       - uses: actions/checkout@v3
       - name: Build Image
-        run: docker build -t cicd101
+        run: docker build -t cicd101 .
       - name: Tag Image
-        run: docker tag cicd101 
+        run: docker tag cicd101 ${{ secrets.DOCKER_USER }}/cicd101:${{ variables.IMAGE_VERSION }}
+      
   # This workflow contains a single job called "build"
   deploy:
     # The type of runner that the job will run on
