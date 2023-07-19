@@ -48,7 +48,7 @@ jobs:
         run: kubectl get node
       
       - name: Deploy myimage
-        run: kubectl create deployment myimage --image ${{ needs.build-push.outputs.image-tag }} 
+        run: kubectl create deployment myimage --image ${{ needs.build-push.outputs.image-tag }} -oyaml --dry-run=client | kubectl apply -f -
       
       - name: Expose service
         run: kubectl expose deploy myimage --name myimage --port 80 --type ClusterIP
