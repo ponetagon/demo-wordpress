@@ -12,7 +12,7 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
+  build-push:
     runs-on: ubuntu-latest
     environment: myimage
     steps:
@@ -21,6 +21,10 @@ jobs:
         run: docker build -t cicd101 .
       - name: Tag Image
         run: docker tag cicd101 ${{ secrets.DOCKER_USER }}/cicd101:${{ variables.IMAGE_VERSION }}
+      - name: Login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+      - name: Push Image
+        run: docker push ${{ secrets.DOCKER_USER }}/cicd101:${{ variables.IMAGE_VERSION }}
       
   # This workflow contains a single job called "build"
   deploy:
@@ -40,7 +44,13 @@ jobs:
           
       - name: Check Node
         run: kubectl get node
-        
+      
+      - name: Deploy myimage
+        run: kubectl create deployment myimage --image ${{ secrets.DOCKER_USER }}/cicd101:${{ variables.IMAGE_VERSION }} 
+      
+      - name: Expose service
+        run: kubectl expose deploy myimage --name myimage --port 80 --type ClusterIP
+      
       - name: Deploy Secret
         run: kubectl create secret generic pass --from-literal password=${{ secrets.PASSWORD }} -oyaml --dry-run=client | kubectl apply -f -
         
