@@ -1,0 +1,62 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    environment: cicd101
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Image
+        run: docker build -t cicd101 .
+      - name: Tag Image
+        run: docker tag cicd101 ${{ secrets.DOCKER_USER }}/cicd101:${{ vars.IMAGE_VERSION }}
+      - name: Login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASS }}
+      - name: Push Image
+        run: docker push ${{ secrets.DOCKER_USER }}/cicd101:${{ vars.IMAGE_VERSION }}
+      
+  # This workflow contains a single job called "build"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    environment: cicd101
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell      
+      - name: Set up Kubernetes
+        uses: azure/k8s-set-context@v1
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+          
+      - name: Check Node
+        run: kubectl get node
+      
+      - name: Deploy myimage
+        run: kubectl create deployment myimage --image ${{ secrets.DOCKER_USER }}/cicd101:${{ vars.IMAGE_VERSION }} -oyaml --dry-run=client | kubectl apply -f -
+      
+      - name: Expose service
+        run: kubectl expose deploy myimage --name myimage --port 80 --type ClusterIP -oyaml --dry-run=client | kubectl apply -f -
+      
+      - name: Deploy Secret
+        run: kubectl create secret generic pass --from-literal password=${{ secrets.PASSWORD }} -oyaml --dry-run=client | kubectl apply -f -
+        
+      - name: Deploy MYSQL 
+        run: kubectl apply -f mysql.yaml
+        
+      - name: Deploy WORDPRESS
+        run: kubectl apply -f wordpress.yaml
+            
